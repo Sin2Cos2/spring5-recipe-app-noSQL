@@ -28,7 +28,7 @@ public class ImageServiceImpl implements ImageService {
             }
 
             recipe.setImage(arr);
-            recipeService.saveRecipe(recipe);
+            recipeService.saveRecipe(recipe).block();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -36,7 +36,7 @@ public class RecipeController {
 
     @GetMapping("/recipe/{id}/update")
     public String updateRecipe(@PathVariable String id, Model model) {
-        model.addAttribute("recipe", service.findCommandById(id));
+        model.addAttribute("recipe", service.findCommandById(id).block());
 
         return "recipe/recipeForm";
     }
@@ -63,7 +63,7 @@ public class RecipeController {
             return "/recipe/recipeForm";
         }
         recipe.setId(null);
-        RecipeCommand savedCommand = service.saveRecipeCommand(recipe);
+        RecipeCommand savedCommand = service.saveRecipeCommand(recipe).block();
 
         return "redirect:/recipe/" + savedCommand.getId() + "/ingredients";
     }
@@ -72,17 +72,17 @@ public class RecipeController {
     public String saveOrUpdate(@Valid @ModelAttribute("recipe") RecipeCommand command, BindingResult result) {
         if(result.hasErrors()) {
             result.getAllErrors().forEach(err -> log.debug(err.toString()));
-            RecipeCommand recipe = service.findCommandById(command.getId());
+            RecipeCommand recipe = service.findCommandById(command.getId()).block();
             command.setIngredients(recipe.getIngredients());
 
             return "/recipe/recipeForm";
         }
 
         log.debug("In the recipe POST");
-        RecipeCommand recipe = service.findCommandById(command.getId());
+        RecipeCommand recipe = service.findCommandById(command.getId()).block();
         command.setIngredients(recipe.getIngredients());
         command.setCategories(recipe.getCategories());
-        RecipeCommand savedCommand = service.saveRecipeCommand(command);
+        RecipeCommand savedCommand = service.saveRecipeCommand(command).block();
 
         return "redirect:/recipe/" + savedCommand.getId() + "/show" ;
     }
