@@ -6,6 +6,7 @@ import guru.springframework.repositories.reactive.UnitOfMeasureReactiveRepositor
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @AllArgsConstructor
 @Service
@@ -18,6 +19,13 @@ public class UnitOfMeasureServiceImpl implements UnitOfMeasureService {
     public Flux<UnitOfMeasureCommand> findAll() {
         return repository
                 .findAll()
+                .map(toUnitOfMeasureCommand::convert);
+    }
+
+    @Override
+    public Mono<UnitOfMeasureCommand> findById(String id) {
+        return repository
+                .findById(id)
                 .map(toUnitOfMeasureCommand::convert);
     }
 }

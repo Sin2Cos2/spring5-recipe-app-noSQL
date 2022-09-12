@@ -26,7 +26,7 @@ public class IngredientController {
 
     @GetMapping("/recipe/{id}/ingredients")
     public String getIngredients(@PathVariable String id, Model model) {
-        Recipe recipe = recipeService.findById(id);
+        Recipe recipe = recipeService.findById(id).block();
         model.addAttribute("recipe", recipe);
 
         return "/recipe/ingredient/list";
@@ -75,6 +75,9 @@ public class IngredientController {
             command.setId(null);
         if (command.getRecipeId() == null || command.getRecipeId().isEmpty())
             command.setRecipeId(recipeId);
+        if (command.getUom().getDescription() == null)
+            command.getUom().setDescription(uomService.findById(command.getUom().getId()).block().getDescription());
+
         ingredientService.saveIngredientCommand(command).block();
 
         return "redirect:/recipe/" + command.getRecipeId() + "/ingredient/" + command.getId() + "/show";
