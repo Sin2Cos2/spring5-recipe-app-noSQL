@@ -14,7 +14,6 @@ public class ImageServiceImpl implements ImageService {
     private final RecipeService recipeService;
 
 
-    //TODO: Если изменить что то в рецепте, изображение удаляется из БД
     @Override
     public void saveImageFile(String id, MultipartFile image) {
         Recipe recipe = recipeService.findById(id).block();
