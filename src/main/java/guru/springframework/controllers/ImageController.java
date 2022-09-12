@@ -4,7 +4,6 @@ import guru.springframework.commands.RecipeCommand;
 import guru.springframework.services.ImageService;
 import guru.springframework.services.RecipeService;
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+//import javax.servlet.http.HttpServletResponse;
 
 @AllArgsConstructor
 @Controller
@@ -40,25 +36,25 @@ public class ImageController {
     }
 
     @GetMapping("/recipe/{id}/recipeImage")
-    public void renderImageFromDB(@PathVariable String id, HttpServletResponse response) {
-        RecipeCommand recipe = recipeService.findCommandById(id).block();
-
-        if(recipe.getImage() == null)
-            return;
-        byte[] img = new byte[recipe.getImage().length];
-
-        int i = 0;
-        for (Byte aByte : recipe.getImage()) {
-            img[i++] = aByte;
-        }
-
-        response.setContentType("image/jpeg");
-        InputStream is = new ByteArrayInputStream(img);
-        try {
-            IOUtils.copy(is, response.getOutputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void renderImageFromDB(@PathVariable String id) {
+//        RecipeCommand recipe = recipeService.findCommandById(id).block();
+//
+//        if(recipe.getImage() == null)
+//            return;
+//        byte[] img = new byte[recipe.getImage().length];
+//
+//        int i = 0;
+//        for (Byte aByte : recipe.getImage()) {
+//            img[i++] = aByte;
+//        }
+//
+//        response.setContentType("image/jpeg");
+//        InputStream is = new ByteArrayInputStream(img);
+//        try {
+//            IOUtils.copy(is, response.getOutputStream());
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
     }
 }

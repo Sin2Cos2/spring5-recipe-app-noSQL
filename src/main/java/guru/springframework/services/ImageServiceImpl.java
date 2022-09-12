@@ -27,6 +27,7 @@ public class ImageServiceImpl implements ImageService {
                 arr[i++] = aByte;
             }
 
+            assert recipe != null;
             recipe.setImage(arr);
             recipeService.saveRecipe(recipe).block();
         } catch (IOException e) {
