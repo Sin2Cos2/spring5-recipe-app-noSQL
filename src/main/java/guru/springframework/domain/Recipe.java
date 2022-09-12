@@ -2,7 +2,6 @@ package guru.springframework.domain;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
@@ -30,7 +29,6 @@ public class Recipe {
     private Set<Ingredient> ingredients = new HashSet<>();
     private Byte[] image;
     private Notes notes;
-    @DBRef
     private Set<Category> categories = new HashSet<>();
 
     public void setNotes(Notes notes) {
@@ -40,7 +38,7 @@ public class Recipe {
 
     public Recipe addIngredient(Ingredient ingredient) {
         this.ingredients.add(ingredient);
-//        ingredient.setRecipe(this);
+        ingredient.setRecipeId(this.getId());
 
         return this;
     }

@@ -2,25 +2,22 @@ package guru.springframework.services;
 
 import guru.springframework.commands.UnitOfMeasureCommand;
 import guru.springframework.converters.UnitOfMeasureToUnitOfMeasureCommand;
-import guru.springframework.repositories.UnitOfMeasureRepository;
+import guru.springframework.repositories.reactive.UnitOfMeasureReactiveRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.Set;
+import reactor.core.publisher.Flux;
 
 @AllArgsConstructor
 @Service
 public class UnitOfMeasureServiceImpl implements UnitOfMeasureService {
 
-    private final UnitOfMeasureRepository repository;
+    private final UnitOfMeasureReactiveRepository repository;
     private final UnitOfMeasureToUnitOfMeasureCommand toUnitOfMeasureCommand;
 
     @Override
-    public Set<UnitOfMeasureCommand> findAll() {
-        Set<UnitOfMeasureCommand> uomCommands = new HashSet<>();
-        repository.findAll().forEach(uom -> uomCommands.add(toUnitOfMeasureCommand.convert(uom)));
-
-        return uomCommands;
+    public Flux<UnitOfMeasureCommand> findAll() {
+        return repository
+                .findAll()
+                .map(toUnitOfMeasureCommand::convert);
     }
 }

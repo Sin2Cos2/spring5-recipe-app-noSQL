@@ -162,6 +162,7 @@ public class RecipeLoader implements ApplicationListener<ContextRefreshedEvent> 
 
         //Yummy Guac
         Recipe guacRecipe = new Recipe();
+        guacRecipe = recipeRepository.save(guacRecipe);
         guacRecipe.setDescription("Perfect Guacamole");
         guacRecipe.setPrepTime(10);
         guacRecipe.setCookTime(0);
@@ -207,6 +208,7 @@ public class RecipeLoader implements ApplicationListener<ContextRefreshedEvent> 
 
         //Yummy Tacos
         Recipe tacosRecipe = new Recipe();
+        tacosRecipe = recipeRepository.save(tacosRecipe);
         tacosRecipe.setDescription("Spicy Grilled Chicken Taco");
         tacosRecipe.setCookTime(9);
         tacosRecipe.setPrepTime(20);
