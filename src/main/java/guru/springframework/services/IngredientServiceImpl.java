@@ -88,20 +88,26 @@ public class IngredientServiceImpl implements IngredientService {
 
     @Override
     public Mono<Void> deleteByRecipeIdAndIngredientId(String recipeId, String id) {
-        Recipe recipe = repository.findById(recipeId).block();
+//        Recipe recipe = repository.findById(recipeId);
+//
+//        Ingredient ingredient = recipe
+//                .getIngredients()
+//                .stream()
+//                .filter(ingredient1 -> ingredient1.getId().equals(id))
+//                .findFirst()
+//                .orElseThrow(() -> new RuntimeException("Ingredient with " + id + " id doesn't  exist"));
+//
+//        recipe.getIngredients().remove(ingredient);
+//        repository.save(recipe).block();
 
-        if (recipe == null)
-            throw new RuntimeException("Recipe with " + recipeId + " id doesn't exits");
-
-        Ingredient ingredient = recipe
-                .getIngredients()
-                .stream()
-                .filter(ingredient1 -> ingredient1.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Ingredient with " + id + " id doesn't  exist"));
-
-        recipe.getIngredients().remove(ingredient);
-        repository.save(recipe).block();
+        repository.findById(recipeId)
+                .map(recipe -> {
+                    recipe
+                            .getIngredients().stream().filter(ingr -> ingr.getId().equals(id))
+                            .map(ingr -> recipe.getIngredients().remove(ingr));
+                    repository.save(recipe);
+                    return Mono.empty();
+                });
 
         return Mono.empty();
     }

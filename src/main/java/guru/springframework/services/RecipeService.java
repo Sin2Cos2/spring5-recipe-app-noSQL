@@ -17,5 +17,5 @@ public interface RecipeService {
 
     Mono<RecipeCommand> findCommandById(String l);
 
-    void deleteById(String l);
+    Mono<Void> deleteById(String l);
 }

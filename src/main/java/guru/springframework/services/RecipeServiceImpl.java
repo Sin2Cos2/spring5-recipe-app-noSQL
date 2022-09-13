@@ -29,12 +29,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Mono<Recipe> findById(String l) {
-        Mono<Recipe> recipe = recipeRepository.findById(l);
-        if (recipe.block() == null) {
-            throw new RuntimeException("Recipe was not found!");
-        }
-
-        return recipe;
+        return recipeRepository.findById(l);
     }
 
     @Override
@@ -52,15 +47,15 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Mono<RecipeCommand> findCommandById(String l) {
-        Mono<Recipe> recipe = recipeRepository.findById(l);
-        if (recipe.block() == null)
-            throw new RuntimeException("Recipe with " + l + " doesn't exist");
-
-        return recipe.map(recipeToRecipeCommand::convert);
+        return recipeRepository
+                .findById(l)
+                .map(recipeToRecipeCommand::convert);
     }
 
     @Override
-    public void deleteById(String l) {
-        recipeRepository.deleteById(l).block();
+    public Mono<Void> deleteById(String l) {
+        recipeRepository.deleteById(l);
+
+        return Mono.empty();
     }
 }
