@@ -82,7 +82,7 @@ public class IngredientServiceImpl implements IngredientService {
     private void updateIngredient(Ingredient ingredient, IngredientCommand command) {
         ingredient.setDescription(command.getDescription());
         ingredient.setAmount(command.getAmount());
-        UnitOfMeasure unitOfMeasure = unitOfMeasureRepository.findById(command.getUom().getId()).block();
+        UnitOfMeasure unitOfMeasure = unitOfMeasureRepository.findById(command.getUom().getId()).toProcessor().block();
         ingredient.setUnitOfMeasure(unitOfMeasure);
     }
 

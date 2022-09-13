@@ -42,6 +42,8 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Mono<RecipeCommand> saveRecipeCommand(RecipeCommand recipe) {
         log.debug(recipe.getDescription() + " was saved");
+        if (recipe.getId() != null)
+            recipe.setIngredients(findCommandById(recipe.getId()).toProcessor().block().getIngredients());
         return recipeRepository
                 .save(recipeCommandToRecipe.convert(recipe))
                 .map(recipeToRecipeCommand::convert)

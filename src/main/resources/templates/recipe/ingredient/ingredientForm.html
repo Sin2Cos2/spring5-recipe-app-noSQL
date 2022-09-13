@@ -12,7 +12,8 @@
 <div class="container-fluid" style="margin-top: 20px">
     <div class="row justify-content-center">
         <div class="col-md-6 col-md-offset-3">
-            <form  th:object="${ingredient}" th:action="@{'/recipe/' + ${ingredient.getRecipeId()} + '/ingredient'} " method="post">
+            <form th:object="${ingredient}" th:action="@{'/recipe/' + ${ingredient.getRecipeId()} + '/ingredient'} "
+                  method="post">
                 <input type="hidden" th:field="*{id}"/>
                 <input type="hidden" th:field="*{recipeId}">
                 <div class="panel-group">
@@ -22,14 +23,28 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-3 form-group"
+                                     th:class="${#fields.hasErrors('description')} ? 'col-md-3 form-group text-danger' : 'col-md-3 form-group'">
                                     <label>Description:</label>
-                                    <input type="text" class="form-control" th:field="*{description}"/>
+                                    <input type="text" class="form-control" th:field="*{description}"
+                                           th:errorclass="is-invalid"/>
+                                    <span class="help-block" th:if="${#fields.hasErrors('description')}">
+                                        <ul>
+                                            <li th:each="err : ${#fields.errors('description')}" th:text="${err}"></li>
+                                        </ul>
+                                    </span>
                                 </div>
 
-                                <div class="col-md-3 form-group">
+                                <div class="col-md-3 form-group"
+                                     th:class="${#fields.hasErrors('amount')} ? 'col-md-3 form-group text-danger' : 'col-md-3 form-group'">
                                     <label>Amount:</label>
-                                    <input type="number" class="form-control" th:field="*{amount}"/>
+                                    <input type="number" step="0.01" class="form-control" th:field="*{amount}"
+                                           th:errorclass="is-invalid"/>
+                                    <span class="help-block" th:if="${#fields.hasErrors('amount')}">
+                                        <ul>
+                                            <li th:each="err : ${#fields.errors('amount')}" th:text="${err}"></li>
+                                        </ul>
+                                    </span>
                                 </div>
 
                                 <div class="col-md-3 form-group">
@@ -38,7 +53,8 @@
                                         <option th:each="uomEach : ${uomList}"
                                                 th:value="${uomEach.id}"
                                                 th:selected="${uomEach.id.equals(ingredient.uom.id)}"
-                                                th:text="${uomEach.description}">Each</option>
+                                                th:text="${uomEach.description}">Each
+                                        </option>
                                     </select>
                                 </div>
                             </div>

@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 @Slf4j
 @Controller
@@ -73,7 +76,7 @@ public class IngredientController {
     }
 
     @PostMapping("/recipe/{recipeId}/ingredient")
-    public Mono<String> saveOrUpdateIngredient(@ModelAttribute Mono<IngredientCommand> command,
+    public Mono<String> saveOrUpdateIngredient(@Valid @ModelAttribute("ingredient") Mono<IngredientCommand> command,
                                                @PathVariable String recipeId, Model model) {
         return command.doOnNext(cmd -> {
                     cmd.setRecipeId(recipeId);
@@ -85,10 +88,15 @@ public class IngredientController {
                         sc.getId()))
                 .map(sc -> "redirect:/recipe/" + sc.getRecipeId() + "/ingredient/" + sc.getId() + "/show")
                 .onErrorResume(WebExchangeBindException.class, thr -> {
-                    ((IngredientCommand) model.getAttribute("ingredient")).setRecipeId(recipeId);
+                    model.addAttribute("uomList", uomService.findAll());
                     return Mono.just(INGREDIENTFORM);
                 })
                 .doOnError(thr -> log.error("Error saving ingredient for recipe {}", recipeId));
+    }
+
+    @ModelAttribute("uomList")
+    public Flux<UnitOfMeasureCommand> getUomList() {
+        return uomService.findAll();
     }
 
 }
