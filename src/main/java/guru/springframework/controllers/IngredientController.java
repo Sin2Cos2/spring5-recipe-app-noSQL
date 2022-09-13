@@ -48,8 +48,6 @@ public class IngredientController {
         log.debug("In the update form");
         model.addAttribute("ingredient", ingredientService.findByRecipeIdAndIngredientId(recipeId, id));
 
-        model.addAttribute("uomList", uomService.findAll());
-
         return "/recipe/ingredient/ingredientForm";
     }
 
@@ -64,7 +62,6 @@ public class IngredientController {
                 });
 
         model.addAttribute("ingredient", ingredient);
-        model.addAttribute("uomList", uomService.findAll());
         return INGREDIENTFORM;
     }
 
@@ -77,7 +74,7 @@ public class IngredientController {
 
     @PostMapping("/recipe/{recipeId}/ingredient")
     public Mono<String> saveOrUpdateIngredient(@Valid @ModelAttribute("ingredient") Mono<IngredientCommand> command,
-                                               @PathVariable String recipeId, Model model) {
+                                               @PathVariable String recipeId) {
         return command.doOnNext(cmd -> {
                     cmd.setRecipeId(recipeId);
                     if (cmd.getId().isEmpty())
@@ -87,10 +84,7 @@ public class IngredientController {
                 .doOnNext(sc -> log.debug("saved recipe id:{} and ingredient id:{}", sc.getRecipeId(),
                         sc.getId()))
                 .map(sc -> "redirect:/recipe/" + sc.getRecipeId() + "/ingredient/" + sc.getId() + "/show")
-                .onErrorResume(WebExchangeBindException.class, thr -> {
-                    model.addAttribute("uomList", uomService.findAll());
-                    return Mono.just(INGREDIENTFORM);
-                })
+                .onErrorResume(WebExchangeBindException.class, thr -> Mono.just(INGREDIENTFORM))
                 .doOnError(thr -> log.error("Error saving ingredient for recipe {}", recipeId));
     }
 
