@@ -2,7 +2,6 @@ package guru.springframework.controllers;
 
 import guru.springframework.commands.IngredientCommand;
 import guru.springframework.commands.UnitOfMeasureCommand;
-import guru.springframework.domain.Recipe;
 import guru.springframework.services.IngredientService;
 import guru.springframework.services.RecipeService;
 import guru.springframework.services.UnitOfMeasureService;
@@ -14,15 +13,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import reactor.core.publisher.Mono;
-
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Controller
 @AllArgsConstructor
 public class IngredientController {
 
+    public static final String INGREDIENTFORM = "recipe/ingredient/ingredientForm";
     private final RecipeService recipeService;
     private final IngredientService ingredientService;
     private final UnitOfMeasureService uomService;
@@ -53,35 +52,43 @@ public class IngredientController {
 
     @GetMapping("/recipe/{recipeId}/ingredient/new")
     public String newIngredient(@PathVariable String recipeId, Model model) {
-        IngredientCommand ingredientCommand = new IngredientCommand();
-        ingredientCommand.setRecipeId(recipeId);
-        model.addAttribute("ingredient", ingredientCommand);
-        ingredientCommand.setUom(new UnitOfMeasureCommand());
-        model.addAttribute("uomList", uomService.findAll());
+        Mono<IngredientCommand> ingredient = recipeService.findCommandById(recipeId)
+                .map(recipeCommand -> {
+                    IngredientCommand ingredientCommand = new IngredientCommand();
+                    ingredientCommand.setRecipeId(recipeCommand.getId());
+                    ingredientCommand.setUom(new UnitOfMeasureCommand());
+                    return ingredientCommand;
+                });
 
-        return "/recipe/ingredient/ingredientForm";
+        model.addAttribute("ingredient", ingredient);
+        model.addAttribute("uomList", uomService.findAll());
+        return INGREDIENTFORM;
     }
 
     @GetMapping("/recipe/{recipeId}/ingredient/{id}/delete")
-    public String deleteIngredient(@PathVariable String recipeId, @PathVariable String id) {
-        ingredientService.deleteByRecipeIdAndIngredientId(recipeId, id).block();
+    public Mono<String> deleteIngredient(@PathVariable String recipeId, @PathVariable String id) {
 
-        return "redirect:/recipe/" + recipeId + "/ingredients";
+        return ingredientService.deleteById(recipeId, id)
+                .thenReturn("redirect:/recipe/" + recipeId + "/ingredients");
     }
 
     @PostMapping("/recipe/{recipeId}/ingredient")
-    public String saveOrUpdateIngredient(@ModelAttribute IngredientCommand command, @PathVariable String recipeId) {
-        if (command.getId().isEmpty())
-            command.setId(null);
-        if (command.getRecipeId() == null || command.getRecipeId().isEmpty())
-            command.setRecipeId(recipeId);
-        if (command.getUom().getDescription() == null)
-            command.getUom().setDescription(uomService
-                    .findById(command.getUom().getId()).block().getDescription());
-
-        ingredientService.saveIngredientCommand(command).block();
-
-        return "redirect:/recipe/" + command.getRecipeId() + "/ingredient/" + command.getId() + "/show";
+    public Mono<String> saveOrUpdateIngredient(@ModelAttribute Mono<IngredientCommand> command,
+                                               @PathVariable String recipeId, Model model) {
+        return command.doOnNext(cmd -> {
+                    cmd.setRecipeId(recipeId);
+                    if (cmd.getId().isEmpty())
+                        cmd.setId(null);
+                })
+                .flatMap(ingredientService::saveIngredientCommand)
+                .doOnNext(sc -> log.debug("saved recipe id:{} and ingredient id:{}", sc.getRecipeId(),
+                        sc.getId()))
+                .map(sc -> "redirect:/recipe/" + sc.getRecipeId() + "/ingredient/" + sc.getId() + "/show")
+                .onErrorResume(WebExchangeBindException.class, thr -> {
+                    ((IngredientCommand) model.getAttribute("ingredient")).setRecipeId(recipeId);
+                    return Mono.just(INGREDIENTFORM);
+                })
+                .doOnError(thr -> log.error("Error saving ingredient for recipe {}", recipeId));
     }
 
 }
